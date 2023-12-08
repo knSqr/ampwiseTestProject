@@ -12,35 +12,10 @@ class AppConfig {
     R_EMAIL;
     R_NAME;
     R_ID;
+    E_CONTENT;
 }
 
-// Define your email template
-const emailTemplate = `
-Hello {{=it.username}}, <br>
 
-<br>
-
-Welcome to Ampwise! We're excited to have you on board. <br>
-
-<br>
-As a token of our warm welcome, here's a welcome e-mail! <br>
-
-<br>
-
-This e-mail was meant for: <br>
-User ID: {{=it.userId}} <br>
-Email: {{=it.email}} <br>
-
-<br>
-
-Thank you for choosing Ampwise. <br>
-
-<br>
-
-Best regards, <br>
-The Ampwise Team <br>
-Email: {{=it.timeSent}}
-`;
 
 @Injectable()
 export class PostmarkService {
@@ -49,12 +24,14 @@ export class PostmarkService {
     async greetCustomerEmail(): Promise<string> {
 
 
+
         const config = new AppConfig();
         config.APIKEY = this.configService.get<string>('apiKey');
         config.GE_ADRRESS = this.configService.get<string>('greetingEmail');
         config.R_EMAIL = this.configService.get<string>('recipientEmail');
         config.R_NAME = this.configService.get<string>('recipientName');
         config.R_ID = this.configService.get<string>('recipientID');
+        config.E_CONTENT = this.configService.get<string>('emailContent');
 
         let error: boolean;
         // Validate and reject if there are errors
@@ -72,6 +49,7 @@ export class PostmarkService {
                 const humanReadableTime = new Date(currentTimeSinceEpoch).toLocaleString();
 
                 // Compile the template
+                const emailTemplate = this.configService.get<string>('emailContent');
                 const compiledTemplate = dot.template(emailTemplate);
 
                 // Example data (replace this with your actual data)
