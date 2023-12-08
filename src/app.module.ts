@@ -6,9 +6,12 @@ import { AppService } from './app.service';
 import { PostmarkModule } from './postmark/postmark.module';
 import { PostmarkExampleModule } from './postmark-example/postmark-example.module';
 
+import config from './postmark/postmark.configuration';
+
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
+    load: [config]
   }), PostmarkModule, PostmarkExampleModule],
   controllers: [AppController],
   providers: [AppService],

@@ -17,33 +17,8 @@ export class AppController {
 
   @Get('send-email')
   sendEmail(): Promise<string> {
-    const { POSTMARK_APIKEY, GREETING_EMAIL_ADDRESS, RECIPIENT_EMAIL, RECIPIENT_NAME, RECIPIENT_ID } = process.env;
-
-    return this.postmarkService.greetCustomerEmail(POSTMARK_APIKEY, GREETING_EMAIL_ADDRESS, RECIPIENT_EMAIL, RECIPIENT_NAME, RECIPIENT_ID);
+    return this.postmarkService.greetCustomerEmail();
   }
 
-  @Post()
-  sayPost(): string {
-    return this.appService.sayPost();
-  }
-
-  @Post('env')
-  leakENV(): string {
-    return this.appService.leakENV();
-  }
-
-  @Post('envshort')
-  envshort(): string {
-    console.log("erther")
-    return `test s ${process.env.TESTKEY}`;
-  }
-
-  @Get('testsendemail')
-  testSendEmail(): string {
-    // Send an email:
-
-    //
-    return `hi`;
-  }
 
 }

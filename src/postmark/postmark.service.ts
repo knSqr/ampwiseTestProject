@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 const postmark = require("postmark");
 const dot = require('dot');
 const { IsNotEmpty, IsString, validateOrReject } = require('class-validator');
+import { ConfigService } from '@nestjs/config';
 
 class AppConfig {
     @IsNotEmpty()
@@ -43,17 +44,17 @@ Email: {{=it.timeSent}}
 
 @Injectable()
 export class PostmarkService {
+    constructor(private readonly configService: ConfigService) { }
 
-    async greetCustomerEmail(POSTMARK_APIKEY, GREETING_EMAIL_ADDRESS, RECIPIENT_EMAIL, RECIPIENT_NAME, RECIPIENT_ID): Promise<string> {
-
+    async greetCustomerEmail(): Promise<string> {
 
 
         const config = new AppConfig();
-        config.APIKEY = POSTMARK_APIKEY;
-        config.GE_ADRRESS = GREETING_EMAIL_ADDRESS;
-        config.R_EMAIL = RECIPIENT_EMAIL;
-        config.R_NAME = RECIPIENT_NAME;
-        config.R_ID = RECIPIENT_ID;
+        config.APIKEY = this.configService.get<string>('apiKey');
+        config.GE_ADRRESS = this.configService.get<string>('greetingEmail');
+        config.R_EMAIL = this.configService.get<string>('recipientEmail');
+        config.R_NAME = this.configService.get<string>('recipientName');
+        config.R_ID = this.configService.get<string>('recipientID');
 
         let error: boolean;
         // Validate and reject if there are errors
@@ -61,10 +62,10 @@ export class PostmarkService {
             .then(async () => {
                 // Configuration is valid, proceed with sending the e-mail
                 // Get the postmark api key from ENV.
-                var client = new postmark.ServerClient(process.env.POSTMARK_APIKEY);
+                var client = new postmark.ServerClient(this.configService.get<string>('apiKey'));
 
                 // Some logic to determine a recipient's email (e.g. from a form) (currently an env)
-                let recipient_determined_at_runtime: string = RECIPIENT_EMAIL;
+                let recipient_determined_at_runtime: string = this.configService.get<string>('recipientEmail');
 
                 // Get current time
                 const currentTimeSinceEpoch = new Date().getTime();
@@ -75,8 +76,8 @@ export class PostmarkService {
 
                 // Example data (replace this with your actual data)
                 const templateData = {
-                    username: RECIPIENT_NAME,
-                    userId: RECIPIENT_ID,
+                    username: this.configService.get<string>('recipientName'),
+                    userId: this.configService.get<string>('recipientID'),
                     email: recipient_determined_at_runtime,
                     timeSent: humanReadableTime,
                 };
@@ -86,7 +87,7 @@ export class PostmarkService {
 
                 // Send the email
                 await client.sendEmail({
-                    'From': GREETING_EMAIL_ADDRESS,
+                    'From': this.configService.get<string>('greetingEmail'),
                     'To': recipient_determined_at_runtime,
                     'Subject': 'Ampwise test',
                     'HtmlBody': renderedEmail
